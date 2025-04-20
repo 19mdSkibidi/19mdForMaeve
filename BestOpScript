@@ -1,181 +1,179 @@
 local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
-
 local Gui = Instance.new("ScreenGui", CoreGui)
 Gui.IgnoreGuiInset = true
-Gui.ResetOnSpawn = false
+Gui.Name = "LoveGuiFinal"
 
 local Frame = Instance.new("Frame", Gui)
 Frame.Size = UDim2.new(1, 0, 1, 0)
 Frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 
+-- ✨ Animated Gradient
 local UIGradient = Instance.new("UIGradient", Frame)
 UIGradient.Color = ColorSequence.new{
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(230, 180, 255)), -- Purple gradient
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(180, 130, 255))
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(180, 140, 255)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(220, 120, 255))
 }
+UIGradient.Rotation = 45
+task.spawn(function()
+	while Gui do
+		for i = 0, 360, 1 do
+			UIGradient.Rotation = i
+			wait(0.03)
+		end
+	end
+end)
 
-local StartButton = Instance.new("TextButton", Frame)
-StartButton.Size = UDim2.new(0, 220, 0, 70)
-StartButton.Position = UDim2.new(0.5, -110, 0.5, -35)
-StartButton.Text = "Start 💖"
-StartButton.BackgroundColor3 = Color3.fromRGB(180, 130, 255) -- Purple color
-StartButton.TextColor3 = Color3.new(1, 1, 1)
-StartButton.Font = Enum.Font.GothamBold
-StartButton.TextSize = 26
-StartButton.BorderSizePixel = 0
-StartButton.AutoButtonColor = true
-Instance.new("UICorner", StartButton)
-
-local function buttonScaleEffect(button)
-	local scaleTween = TweenService:Create(button, TweenInfo.new(0.5, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), {Size = UDim2.new(0, 240, 0, 80)})
-	scaleTween:Play()
+-- 💖 Heart Particle Trail
+local function spawnHearts(pos)
+	local particle = Instance.new("ParticleEmitter")
+	particle.Texture = "rbxassetid://12920117843"
+	particle.Lifetime = NumberRange.new(1)
+	particle.Rate = 50
+	particle.Speed = NumberRange.new(2)
+	particle.SpreadAngle = Vector2.new(360, 360)
+	particle.Size = NumberSequence.new(0.5)
+	particle.Parent = pos
+	task.delay(0.6, function() particle.Enabled = false particle:Destroy() end)
 end
 
-StartButton.MouseButton1Click:Connect(function()
-	buttonScaleEffect(StartButton)
+-- 🌟 Button Effects
+local function addEffects(btn)
+	Instance.new("UICorner", btn)
+	local glow = Instance.new("UIStroke", btn)
+	glow.Color = Color3.fromRGB(255, 255, 255)
+	glow.Thickness = 2
+	glow.Transparency = 0.5
+	btn.MouseEnter:Connect(function()
+		TweenService:Create(btn, TweenInfo.new(0.2), {Size = btn.Size + UDim2.new(0, 10, 0, 10)}):Play()
+	end)
+	btn.MouseLeave:Connect(function()
+		TweenService:Create(btn, TweenInfo.new(0.2), {Size = btn.Size - UDim2.new(0, 10, 0, 10)}):Play()
+	end)
+end
+
+-- 💫 Fade Transition
+local function fadeScreen(callback)
 	local fade = Instance.new("Frame", Frame)
 	fade.Size = UDim2.new(1, 0, 1, 0)
-	fade.BackgroundColor3 = Color3.new(1, 1, 1)
+	fade.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 	fade.BackgroundTransparency = 1
-	local tween = TweenService:Create(fade, TweenInfo.new(1), {BackgroundTransparency = 0})
-	tween:Play()
-	tween.Completed:Wait()
+	fade.ZIndex = 99
+	fade.Parent = Frame
+	TweenService:Create(fade, TweenInfo.new(1), {BackgroundTransparency = 0}):Play()
+	wait(1)
+	callback()
+end
 
-	for _, v in pairs(Frame:GetChildren()) do
-		if v:IsA("GuiObject") then v:Destroy() end
-	end
+-- ❣️ Final Fade Out
+local function finalFade()
+	fadeScreen(function()
+		Gui:Destroy()
+	end)
+end
 
-	local UIGradient1 = UIGradient:Clone()
-	UIGradient1.Parent = Frame
+-- 🌸 Step 2: Are You Sure
+local function areYouSure()
+	Frame:ClearAllChildren()
+	UIGradient:Clone().Parent = Frame
 
-	local HeartBG = Instance.new("ImageLabel", Frame)
-	HeartBG.Size = UDim2.new(1, 0, 1, 0)
-	HeartBG.BackgroundTransparency = 1
-	HeartBG.Image = "rbxassetid://6071575925"
-	HeartBG.ImageTransparency = 0.8
+	local text = Instance.new("TextLabel", Frame)
+	text.Text = "Are you sure? 💭"
+	text.Size = UDim2.new(1, 0, 0, 60)
+	text.Position = UDim2.new(0, 0, 0.25, 0)
+	text.BackgroundTransparency = 1
+	text.Font = Enum.Font.GothamBold
+	text.TextSize = 36
+	text.TextColor3 = Color3.new(1, 1, 1)
+	text.TextStrokeTransparency = 0.5
 
-	local Question = Instance.new("TextLabel", Frame)
-	Question.Size = UDim2.new(1, 0, 0, 60)
-	Question.Position = UDim2.new(0, 0, 0.25, 0)
-	Question.Text = "Will you be my girlfriend? 💕"
-	Question.Font = Enum.Font.GothamBold
-	Question.TextSize = 32
-	Question.TextColor3 = Color3.new(1, 1, 1)
-	Question.BackgroundTransparency = 1
-	Question.TextStrokeTransparency = 0.5
-	Question.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+	local yes = Instance.new("TextButton", Frame)
+	yes.Size = UDim2.new(0, 200, 0, 60)
+	yes.Position = UDim2.new(0.5, -210, 0.5, 30)
+	yes.Text = "Yes 💘"
+	yes.BackgroundColor3 = Color3.fromRGB(170, 0, 255)
+	yes.TextColor3 = Color3.new(1, 1, 1)
+	yes.Font = Enum.Font.GothamBold
+	yes.TextSize = 24
+	addEffects(yes)
 
-	local Yes = Instance.new("TextButton", Frame)
-	Yes.Size = UDim2.new(0, 200, 0, 70)
-	Yes.Position = UDim2.new(0.5, -210, 0.5, 30)
-	Yes.Text = "Yes 💘"
-	Yes.BackgroundColor3 = Color3.fromRGB(180, 130, 255) -- Purple color
-	Yes.TextColor3 = Color3.new(1, 1, 1)
-	Yes.Font = Enum.Font.GothamBold
-	Yes.TextSize = 26
-	Instance.new("UICorner", Yes)
+	local no = Instance.new("TextButton", Frame)
+	no.Size = UDim2.new(0, 150, 0, 55)
+	no.Position = UDim2.new(0.5, 70, 0.5, 35)
+	no.Text = "No 😢"
+	no.BackgroundColor3 = Color3.fromRGB(120, 0, 120)
+	no.TextColor3 = Color3.new(1, 1, 1)
+	no.Font = Enum.Font.GothamBold
+	no.TextSize = 22
+	addEffects(no)
 
-	local No = Instance.new("TextButton", Frame)
-	No.Size = UDim2.new(0, 140, 0, 60)
-	No.Position = UDim2.new(0.5, 70, 0.5, 35)
-	No.Text = "No 😢"
-	No.BackgroundColor3 = Color3.fromRGB(255, 182, 193)
-	No.TextColor3 = Color3.new(1, 1, 1)
-	No.Font = Enum.Font.GothamBold
-	No.TextSize = 22
-	Instance.new("UICorner", No)
-
-	-- Apply scale effect to buttons
-	buttonScaleEffect(Yes)
-	buttonScaleEffect(No)
-
-	TweenService:Create(fade, TweenInfo.new(1), {BackgroundTransparency = 1}):Play()
-
-	Yes.MouseButton1Click:Connect(function()
-		buttonScaleEffect(Yes)
-		local fade2 = Instance.new("Frame", Frame)
-		fade2.Size = UDim2.new(1, 0, 1, 0)
-		fade2.BackgroundColor3 = Color3.new(1, 1, 1)
-		fade2.BackgroundTransparency = 1
-		fade2.ZIndex = 10
-		fade2.Parent = Frame
-
-		TweenService:Create(fade2, TweenInfo.new(1), {BackgroundTransparency = 0}):Play()
-		wait(1)
-
-		for _, v in pairs(Frame:GetChildren()) do
-			if v:IsA("GuiObject") and v ~= fade2 then v:Destroy() end
-		end
-
-		local UIGradient2 = UIGradient:Clone()
-		UIGradient2.Parent = Frame
-
-		local Question2 = Instance.new("TextLabel", Frame)
-		Question2.Size = UDim2.new(1, 0, 0, 60)
-		Question2.Position = UDim2.new(0, 0, 0.25, 0)
-		Question2.Text = "Are you sure? 💭"
-		Question2.Font = Enum.Font.GothamBold
-		Question2.TextSize = 32
-		Question2.TextColor3 = Color3.new(1, 1, 1)
-		Question2.BackgroundTransparency = 1
-		Question2.TextStrokeTransparency = 0.5
-		Question2.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-
-		local Yes2 = Instance.new("TextButton", Frame)
-		Yes2.Size = UDim2.new(0, 200, 0, 70)
-		Yes2.Position = UDim2.new(0.5, -210, 0.5, 30)
-		Yes2.Text = "Yes 💘"
-		Yes2.BackgroundColor3 = Color3.fromRGB(180, 130, 255) -- Purple color
-		Yes2.TextColor3 = Color3.new(1, 1, 1)
-		Yes2.Font = Enum.Font.GothamBold
-		Yes2.TextSize = 26
-		Instance.new("UICorner", Yes2)
-
-		local No2 = Instance.new("TextButton", Frame)
-		No2.Size = UDim2.new(0, 140, 0, 60)
-		No2.Position = UDim2.new(0.5, 70, 0.5, 35)
-		No2.Text = "No 😢"
-		No2.BackgroundColor3 = Color3.fromRGB(255, 182, 193)
-		No2.TextColor3 = Color3.new(1, 1, 1)
-		No2.Font = Enum.Font.GothamBold
-		No2.TextSize = 22
-		Instance.new("UICorner", No2)
-
-		-- Apply scale effect to new buttons
-		buttonScaleEffect(Yes2)
-		buttonScaleEffect(No2)
-
-		TweenService:Create(fade2, TweenInfo.new(1), {BackgroundTransparency = 1}):Play()
-
-		Yes2.MouseButton1Click:Connect(function()
-			local fadeOut = Instance.new("Frame", Frame)
-			fadeOut.Size = UDim2.new(1, 0, 1, 0)
-			fadeOut.BackgroundColor3 = Color3.new(1, 1, 1)
-			fadeOut.BackgroundTransparency = 1
-			fadeOut.ZIndex = 20
-			fadeOut.Parent = Frame
-
-			local fadeOutTween = TweenService:Create(fadeOut, TweenInfo.new(1), {BackgroundTransparency = 0})
-			fadeOutTween:Play()
-			wait(1)
-
-			-- Destroy all elements after fade out
-			for _, v in pairs(Gui:GetChildren()) do
-				if v:IsA("GuiObject") then v:Destroy() end
-			end
-		end)
-
-		No2.MouseButton1Click:Connect(function()
-			-- Add your no button action here (e.g., a sound effect or animation)
-		end)
+	yes.MouseButton1Click:Connect(function()
+		spawnHearts(yes)
+		finalFade()
 	end)
 
-	No.MouseButton1Click:Connect(function()
-		-- Add your no button action here (e.g., a sound effect or animation)
-		-- Optionally add code to destroy GUI or trigger another action
-		for _, v in pairs(Gui:GetChildren()) do
-			if v:IsA("GuiObject") then v:Destroy() end
-		end
+	no.MouseButton1Click:Connect(function()
+		spawnHearts(no)
 	end)
+end
+
+-- 💌 Step 1: Will You Be My GF
+local function askQuestion()
+	Frame:ClearAllChildren()
+	UIGradient:Clone().Parent = Frame
+
+	local text = Instance.new("TextLabel", Frame)
+	text.Text = "Maeve will you be my girlfriend?🥺💕"
+	text.Size = UDim2.new(1, 0, 0, 60)
+	text.Position = UDim2.new(0, 0, 0.25, 0)
+	text.BackgroundTransparency = 1
+	text.Font = Enum.Font.GothamBold
+	text.TextSize = 36
+	text.TextColor3 = Color3.new(1, 1, 1)
+	text.TextStrokeTransparency = 0.5
+
+	local yes = Instance.new("TextButton", Frame)
+	yes.Size = UDim2.new(0, 200, 0, 60)
+	yes.Position = UDim2.new(0.5, -210, 0.5, 30)
+	yes.Text = "Yes 💘"
+	yes.BackgroundColor3 = Color3.fromRGB(170, 0, 255)
+	yes.TextColor3 = Color3.new(1, 1, 1)
+	yes.Font = Enum.Font.GothamBold
+	yes.TextSize = 24
+	addEffects(yes)
+
+	local no = Instance.new("TextButton", Frame)
+	no.Size = UDim2.new(0, 150, 0, 55)
+	no.Position = UDim2.new(0.5, 70, 0.5, 35)
+	no.Text = "No 😢"
+	no.BackgroundColor3 = Color3.fromRGB(120, 0, 120)
+	no.TextColor3 = Color3.new(1, 1, 1)
+	no.Font = Enum.Font.GothamBold
+	no.TextSize = 22
+	addEffects(no)
+
+	yes.MouseButton1Click:Connect(function()
+		spawnHearts(yes)
+		fadeScreen(areYouSure)
+	end)
+
+	no.MouseButton1Click:Connect(function()
+		spawnHearts(no)
+	end)
+end
+
+-- 🎬 Start Button
+local Start = Instance.new("TextButton", Frame)
+Start.Size = UDim2.new(0, 220, 0, 70)
+Start.Position = UDim2.new(0.5, -110, 0.5, -35)
+Start.Text = "Start"
+Start.BackgroundColor3 = Color3.fromRGB(170, 0, 255)
+Start.TextColor3 = Color3.new(1, 1, 1)
+Start.Font = Enum.Font.GothamBold
+Start.TextSize = 28
+addEffects(Start)
+
+Start.MouseButton1Click:Connect(function()
+	spawnHearts(Start)
+	fadeScreen(askQuestion)
 end)
